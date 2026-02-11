@@ -75,6 +75,22 @@ Uses the [on-unblocked](https://github.com/google-labs-code/on-unblocked) action
 
 ---
 
+### [enterprise.yml](./enterprise.yml)
+**Trigger:** Scheduled (daily) or manual
+
+A comprehensive security, compliance, and governance audit workflow designed for enterprise environments.
+
+**Key Features:**
+- **Security:** Scans for secrets, vulnerabilities, and insecure configurations.
+- **Compliance:** Checks for license headers, prohibited licenses, and PII handling.
+- **Governance:** Verifies existence of CODEOWNERS and other policy files.
+
+**Output:**
+- Creates PRs for critical fixes.
+- Generates detailed audit reports for non-critical issues.
+
+---
+
 ## Combining Workflows
 
 You can combine multiple approaches:
