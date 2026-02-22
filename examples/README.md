@@ -59,7 +59,7 @@ A performance optimization agent that hunts for speed improvements across fronte
 Automatically attempt to fix CI failures. Jules analyzes the failure and proposes a fix on the failing branch.
 
 **Setup:**
-- Change `workflows: ["CI"]` to match your actual CI workflow name
+- Change `workflows: ["YOUR_CI_WORKFLOW_NAME"]` to match your actual CI workflow name
 - Works best for test failures and lint errors
 
 ---
