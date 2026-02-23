@@ -40,25 +40,25 @@ runs:
         USER_PROMPT: ${{ inputs.prompt }}
       shell: bash
       run: |
-        echo "$USER_PROMPT" > prompt.txt
+        printf "%s\n" "$USER_PROMPT" > prompt.txt
 
     - name: Save last commit content
       if: ${{ inputs.include_last_commit }}
       shell: bash
       run: |
-        echo -e '\n\nContent of the latest commit (in the format of `git show`):' >> prompt.txt
-        echo '```' >> prompt.txt
-        git show   >> prompt.txt
-        echo '```' >> prompt.txt
+        printf '\n\nContent of the latest commit (in the format of `git show`):\n' >> prompt.txt
+        printf '```\n' >> prompt.txt
+        git show       >> prompt.txt
+        printf '```\n' >> prompt.txt
 
     - name: Save git log
       if: ${{ inputs.include_commit_log }}
       shell: bash
       run: |
-        echo -e '\n\nLog of the last 20 commits (in the format of `git log --stat`):' >> prompt.txt
-        echo '```'         >> prompt.txt
+        printf '\n\nLog of the last 20 commits (in the format of `git log --stat`):\n' >> prompt.txt
+        printf '```\n'     >> prompt.txt
         git log -20 --stat >> prompt.txt
-        echo '```'         >> prompt.txt
+        printf '```\n'     >> prompt.txt
 
     - name: Assemble Jules payload
       env:
