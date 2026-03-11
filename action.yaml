@@ -39,8 +39,7 @@ runs:
       env:
         USER_PROMPT: ${{ inputs.prompt }}
       shell: bash
-      run: |
-        printf "%s" "$USER_PROMPT" > prompt.txt
+      run: ${{ github.action_path }}/scripts/create_prompt.sh
 
     - name: Save last commit content
       if: ${{ inputs.include_last_commit }}
