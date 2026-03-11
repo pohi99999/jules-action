@@ -7,6 +7,7 @@ on:
 jobs:
   detect-unblocked:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       issues: read
     outputs:
@@ -21,6 +22,7 @@ jobs:
     needs: detect-unblocked
     if: needs.detect-unblocked.outputs.found == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
       issues: read
