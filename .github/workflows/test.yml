@@ -1,0 +1,32 @@
+name: Test Action
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test-failure-handling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run action with invalid API key
+        id: jules_invoke
+        continue-on-error: true
+        uses: ./
+        with:
+          prompt: 'test prompt'
+          jules_api_key: 'invalid_key_for_testing'
+
+      - name: Assert action failed correctly
+        run: |
+          if [ "${{ steps.jules_invoke.outcome }}" != "failure" ]; then
+            printf "Error: Expected action to fail with an invalid API key, but it succeeded.\n"
+            bash -c 'exit 1'
+          else
+            printf "Success: Action correctly failed when the API call failed.\n"
+          fi
