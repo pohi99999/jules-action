@@ -27,6 +27,10 @@ inputs:
     description: 'The Jules API key to use for authentication'
     required: true
     type: string
+  dry_run:
+    description: 'If true, Jules will not be invoked (payload will still be generated)'
+    type: boolean
+    default: false
 
 runs:
   using: "composite"
@@ -76,6 +80,7 @@ runs:
           }' > jules_payload.json
 
     - name: Invoke Jules
+      if: ${{ inputs.dry_run == 'false' || inputs.dry_run == false }}
       shell: bash
       run: |
         curl 'https://jules.googleapis.com/v1alpha/sessions' \
