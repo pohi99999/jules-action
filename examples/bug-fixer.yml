@@ -6,6 +6,7 @@ on:
 
 jobs:
   fix-bug:
+    timeout-minutes: 60
     # Only run when the 'bug' label is added
     # Note you can also get Jules to trigger
     # on repos by adding the 'jules' label,
