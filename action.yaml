@@ -45,19 +45,23 @@ runs:
       if: ${{ inputs.include_last_commit }}
       shell: bash
       run: |
-        printf '\n\nContent of the latest commit (in the format of `git show`):\n' >> prompt.txt
-        printf '```\n' >> prompt.txt
-        git show       >> prompt.txt
-        printf '```\n' >> prompt.txt
+        {
+          printf '\n\nContent of the latest commit (in the format of `git show`):\n'
+          printf '```\n'
+          git show
+          printf '```\n'
+        } >> prompt.txt
 
     - name: Save git log
       if: ${{ inputs.include_commit_log }}
       shell: bash
       run: |
-        printf '\n\nLog of the last 20 commits (in the format of `git log --stat`):\n' >> prompt.txt
-        printf '```\n'     >> prompt.txt
-        git log -20 --stat >> prompt.txt
-        printf '```\n'     >> prompt.txt
+        {
+          printf '\n\nLog of the last 20 commits (in the format of `git log --stat`):\n'
+          printf '```\n'
+          git log -20 --stat
+          printf '```\n'
+        } >> prompt.txt
 
     - name: Assemble Jules payload
       env:
