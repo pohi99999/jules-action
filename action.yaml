@@ -38,8 +38,9 @@ runs:
     - name: Create initial prompt
       env:
         USER_PROMPT: ${{ inputs.prompt }}
+        ACTION_PATH: ${{ github.action_path }}
       shell: bash
-      run: ${{ github.action_path }}/scripts/create_prompt.sh
+      run: "$ACTION_PATH/scripts/create_prompt.sh"
 
     - name: Save last commit content
       if: ${{ inputs.include_last_commit }}
@@ -82,8 +83,28 @@ runs:
         JULES_API_KEY: ${{ inputs.jules_api_key }}
       shell: bash
       run: |
-        curl -fsSL 'https://jules.googleapis.com/v1alpha/sessions' \
+        # Use a temporary file for the API key to avoid exposure in process lists
+        trap 'rm -f .headers' EXIT
+        printf "X-Goog-Api-Key: %s" "$JULES_API_KEY" > .headers
+
+        # Capture the HTTP status code to handle errors properly
+        # Also check curl's exit code to catch network errors (status 000)
+        set +e
+        RESPONSE=$(curl -sSL -w "\n%{http_code}" 'https://jules.googleapis.com/v1alpha/sessions' \
           -X POST \
           -H "Content-Type: application/json" \
-          -H "X-Goog-Api-Key: $JULES_API_KEY" \
-          -d @jules_payload.json
+          -H @.headers \
+          -d @jules_payload.json)
+        CURL_EXIT_CODE=$?
+        set -e
+
+        HTTP_STATUS=$(echo "$RESPONSE" | tail -n 1)
+        BODY=$(echo "$RESPONSE" | sed '$d')
+
+        if [ "$CURL_EXIT_CODE" -ne 0 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+          printf "Error: API request failed with status %s\n" "$HTTP_STATUS" >&2
+          printf "Response body: %s\n" "$BODY" >&2
+          exit 1
+        fi
+
+        printf "Successfully invoked Jules. Status: %s\n" "$HTTP_STATUS"
