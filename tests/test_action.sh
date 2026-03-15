@@ -51,7 +51,5 @@ run_test "Hyphen e prompt" "-e"
 echo "---------------------------------------------------"
 if [ "$FAILED" -eq 1 ]; then
   echo "❌ Tests failed"
-fi
-if [ "$FAILED" -eq 1 ]; then
   kill -s TERM $$
 fi
