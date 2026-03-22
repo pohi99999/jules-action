@@ -68,18 +68,7 @@ runs:
         STARTING_BRANCH: ${{ inputs.starting_branch }}
         REPO_FULL_NAME: ${{ github.repository }}
       shell: bash
-      run: |
-        jq -n --rawfile jules_prompt prompt.txt --arg starting_branch "$STARTING_BRANCH" --arg repo_full_name "$REPO_FULL_NAME" '{
-            "prompt": $jules_prompt,
-            "sourceContext": {
-              "source": "sources/github/\($repo_full_name)",
-              "githubRepoContext": {
-                "startingBranch": $starting_branch
-              }
-            },
-            "requirePlanApproval": false,
-            "automationMode": "AUTO_CREATE_PR"
-          }' > jules_payload.json
+      run: ${{ github.action_path }}/scripts/assemble_payload.sh
 
     - name: Invoke Jules
       env:
