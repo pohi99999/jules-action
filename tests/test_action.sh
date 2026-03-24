@@ -69,11 +69,9 @@ run_assemble_payload_test() {
     FAILED=1
   else
     # Verify JSON structure and values
-    local actual_prompt=$(jq -r '.prompt' jules_payload.json)
-    local actual_branch=$(jq -r '.sourceContext.githubRepoContext.startingBranch' jules_payload.json)
-    local actual_source=$(jq -r '.sourceContext.source' jules_payload.json)
-    local actual_approval=$(jq -r '.requirePlanApproval' jules_payload.json)
-    local actual_mode=$(jq -r '.automationMode' jules_payload.json)
+    eval "$(jq -r '@sh "local actual_prompt=\(.prompt) actual_branch=\(.sourceContext.githubRepoContext.startingBranch) actual_source=\(.sourceContext.source) actual_approval=\(.requirePlanApproval) actual_mode=\(.automationMode)"' jules_payload.json)"
+    # Strip trailing newlines from actual_prompt to match previous command substitution behavior
+    actual_prompt="${actual_prompt%"${actual_prompt##*[!$'\n']}"}"
 
     local errors=""
     if [ "$actual_prompt" != "$prompt_content" ]; then
