@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+if ! command -v jq >/dev/null 2>&1; then
+  printf "Error: jq is not installed. Please install it to continue.\n" >&2
+  exit 1
+fi
+
 # Assemble Jules payload
 # Using --rawfile for the prompt to avoid shell command-line length limits (ARG_MAX)
 jq -n --rawfile jules_prompt prompt.txt --arg starting_branch "$STARTING_BRANCH" --arg repo_full_name "$REPO_FULL_NAME" '{
