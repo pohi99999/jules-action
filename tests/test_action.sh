@@ -69,28 +69,43 @@ run_assemble_payload_test() {
     FAILED=1
   else
     # Verify JSON structure and values
-    local actual_prompt=$(jq -r '.prompt' jules_payload.json)
-    local actual_branch=$(jq -r '.sourceContext.githubRepoContext.startingBranch' jules_payload.json)
-    local actual_source=$(jq -r '.sourceContext.source' jules_payload.json)
-    local actual_approval=$(jq -r '.requirePlanApproval' jules_payload.json)
-    local actual_mode=$(jq -r '.automationMode' jules_payload.json)
+    local -A expected=(
+      ["prompt"]="$prompt_content"
+      ["branch"]="$starting_branch"
+      ["source"]="sources/github/$repo_full_name"
+      ["approval"]="false"
+      ["mode"]="AUTO_CREATE_PR"
+    )
+
+    local -A paths=(
+      ["prompt"]=".prompt"
+      ["branch"]=".sourceContext.githubRepoContext.startingBranch"
+      ["source"]=".sourceContext.source"
+      ["approval"]=".requirePlanApproval"
+      ["mode"]=".automationMode"
+    )
+
+    local -A labels=(
+      ["prompt"]="prompt"
+      ["branch"]="starting branch"
+      ["source"]="source"
+      ["approval"]="requirePlanApproval"
+      ["mode"]="automationMode"
+    )
 
     local errors=""
-    if [ "$actual_prompt" != "$prompt_content" ]; then
-      errors+="  - Incorrect prompt\n"
-    fi
-    if [ "$actual_branch" != "$starting_branch" ]; then
-      errors+="  - Incorrect starting branch: got $actual_branch, want $starting_branch\n"
-    fi
-    if [ "$actual_source" != "sources/github/$repo_full_name" ]; then
-      errors+="  - Incorrect source: got $actual_source, want sources/github/$repo_full_name\n"
-    fi
-    if [ "$actual_approval" != "false" ]; then
-      errors+="  - Incorrect requirePlanApproval: got $actual_approval, want false\n"
-    fi
-    if [ "$actual_mode" != "AUTO_CREATE_PR" ]; then
-      errors+="  - Incorrect automationMode: got $actual_mode, want AUTO_CREATE_PR\n"
-    fi
+    local field
+    for field in prompt branch source approval mode; do
+      local actual=$(jq -r "${paths[$field]}" jules_payload.json)
+      local want="${expected[$field]}"
+      if [ "$actual" != "$want" ]; then
+        if [ "$field" == "prompt" ]; then
+          errors+="  - Incorrect prompt\n"
+        else
+          errors+="  - Incorrect ${labels[$field]}: got $actual, want $want\n"
+        fi
+      fi
+    done
 
     if [ -n "$errors" ]; then
       echo "❌ FAIL: $test_name"
