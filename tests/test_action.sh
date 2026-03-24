@@ -110,6 +110,44 @@ run_assemble_payload_test "Multi-line prompt in payload" "Line 1
 Line 2" "main" "org/repo"
 run_assemble_payload_test "Special characters in payload" 'Quotes " and $ and \ ' "feat/branch" "org/repo"
 
+echo "Testing failure cases for 'Assemble Jules payload'..."
+
+# Test jq missing
+(
+  # Create a directory for our fake tools
+  mkdir -p fake_bin
+
+  # Set PATH to ONLY our fake_bin directory.
+  # This should make 'jq' not found.
+  # We might need to provide some basic tools if assemble_payload.sh uses them before jq check.
+  # Currently it uses: set -e, command, printf, exit.
+  # 'command' is a shell builtin. 'printf' is usually a shell builtin. 'exit' is a shell builtin.
+
+  OLD_PATH="$PATH"
+  export PATH="$(pwd)/fake_bin"
+
+  if ./scripts/assemble_payload.sh 2>/dev/null; then
+    echo "❌ FAIL: jq missing test - script should have failed"
+    export PATH="$OLD_PATH"
+    exit 1
+  else
+    echo "✅ PASS: jq missing test - script failed as expected"
+    export PATH="$OLD_PATH"
+  fi
+) || FAILED=1
+rm -rf fake_bin
+
+# Test prompt.txt missing
+(
+  rm -f prompt.txt
+  if ./scripts/assemble_payload.sh 2>/dev/null; then
+    echo "❌ FAIL: prompt.txt missing test - script should have failed"
+    exit 1
+  else
+    echo "✅ PASS: prompt.txt missing test - script failed as expected"
+  fi
+) || FAILED=1
+
 echo "---------------------------------------------------"
 if [ "$FAILED" -eq 1 ]; then
   echo "❌ Tests failed"
