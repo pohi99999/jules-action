@@ -13,4 +13,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run bash tests
-        run: ./tests/test_action.sh
+        run: |
+          ./tests/test_action.sh
+          ./tests/test_save_git_info.sh
