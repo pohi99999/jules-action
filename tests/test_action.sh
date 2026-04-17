@@ -121,16 +121,13 @@ echo "Testing failure cases for 'Assemble Jules payload'..."
   # Currently it uses: set -e, command, printf, exit.
   # 'command' is a shell builtin. 'printf' is usually a shell builtin. 'exit' is a shell builtin.
 
-  OLD_PATH="$PATH"
   export PATH="$(pwd)/fake_bin"
 
   if ./scripts/assemble_payload.sh 2>/dev/null; then
     echo "❌ FAIL: jq missing test - script should have failed"
-    export PATH="$OLD_PATH"
     exit 1
   else
     echo "✅ PASS: jq missing test - script failed as expected"
-    export PATH="$OLD_PATH"
   fi
 ) || FAILED=1
 rm -rf fake_bin
