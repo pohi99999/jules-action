@@ -19,6 +19,11 @@ cat <<'EOF_GIT' > "$TEST_DIR/bin/git"
 #!/bin/bash
 # Use octal for backtick (\140) to represent triple backticks safely
 backticks="\140\140\140"
+
+if [ "$MOCK_GIT_FAIL" == "1" ]; then
+  exit 1
+fi
+
 if [ "$1" == "show" ]; then
   printf "commit abc123def\n\n    Test commit with %b triple backticks\n" "$backticks"
 elif [ "$1" == "log" ]; then
@@ -80,9 +85,29 @@ run_test() {
   rm -f "$TEST_DIR/prompt.txt" "$TEST_DIR/actual_stderr"
 }
 
+run_failure_test() {
+  local test_name="$1"
+  local mode="$2"
+
+  echo "Initial content" > "$TEST_DIR/prompt.txt"
+
+  if MOCK_GIT_FAIL=1 "$SCRIPTS_DIR/save_git_info.sh" "$mode" > /dev/null 2>&1; then
+      echo "❌ FAIL: $test_name - Expected failure when git fails"
+      FAILED=1
+  else
+      echo "✅ PASS: $test_name"
+  fi
+
+  rm -f "$TEST_DIR/prompt.txt"
+}
+
 run_test "Last commit mode" "--last-commit" "Existing prompt content" "Content of the latest commit"
 run_test "Commit log mode" "--commit-log" "Existing prompt content" "Log of the last 20 commits"
 run_test "Invalid mode" "--invalid" "Should stay" "No header"
+
+echo "Testing failure cases (git command failures)..."
+run_failure_test "Last commit failure" "--last-commit"
+run_failure_test "Commit log failure" "--commit-log"
 
 export PATH="$OLD_PATH"
 
