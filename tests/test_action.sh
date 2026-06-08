@@ -99,7 +99,9 @@ run_assemble_payload_test() {
     fi
   fi
 
-  rm -f prompt.txt jules_payload.json
+  rm -f prompt.txt
+  # Truncate jules_payload.json instead of deleting it, as it's tracked by git
+  : > jules_payload.json
 }
 
 run_assemble_payload_test "Standard payload" "Fix all bugs" "main" "google-labs-code/jules-invoke"
