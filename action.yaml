@@ -60,11 +60,8 @@ runs:
 
     - name: Invoke Jules
       env:
+        ACTION_PATH: ${{ github.action_path }}
         JULES_API_KEY: ${{ inputs.jules_api_key }}
       shell: bash
       run: |
-        curl -fsSL 'https://jules.googleapis.com/v1alpha/sessions' \
-          -X POST \
-          -H "Content-Type: application/json" \
-          -H "X-Goog-Api-Key: $JULES_API_KEY" \
-          -d @jules_payload.json
+        "$ACTION_PATH/scripts/invoke_jules.sh"
