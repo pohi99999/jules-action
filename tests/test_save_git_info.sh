@@ -56,15 +56,18 @@ run_test() {
       "$SCRIPTS_DIR/save_git_info.sh" "$mode"
       popd > /dev/null
 
-      if grep -q "$expected_header" "$TEST_DIR/prompt.txt"; then
+      local prompt_content
+      prompt_content=$(< "$TEST_DIR/prompt.txt")
+
+      if [[ "$prompt_content" == *"$expected_header"* ]]; then
           # Check for initial content preservation
-          if grep -q "$initial_content" "$TEST_DIR/prompt.txt"; then
+          if [[ "$prompt_content" == *"$initial_content"* ]]; then
               # Check for triple backtick escaping (they should be replaced with ` ` `)
-              if grep -F '` ` `' "$TEST_DIR/prompt.txt" > /dev/null; then
+              if [[ "$prompt_content" == *"\` \` \`"* ]]; then
                   echo "✅ PASS: $test_name"
               else
                   echo "❌ FAIL: $test_name - Triple backticks not correctly escaped"
-                  cat "$TEST_DIR/prompt.txt"
+                  printf "%s\n" "$prompt_content"
                   FAILED=1
               fi
           else
