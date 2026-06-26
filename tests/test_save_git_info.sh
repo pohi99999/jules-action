@@ -43,38 +43,32 @@ run_test() {
       if "$SCRIPTS_DIR/save_git_info.sh" "$mode" 2>"$TEST_DIR/actual_stderr"; then
           echo "❌ FAIL: $test_name - Expected failure for invalid mode"
           FAILED=1
-      else
-          if grep -q "Usage:" "$TEST_DIR/actual_stderr"; then
-              echo "✅ PASS: $test_name"
-          else
-              echo "❌ FAIL: $test_name - Usage message not found in stderr"
-              FAILED=1
-          fi
-      fi
-  else
-      pushd "$TEST_DIR" > /dev/null
-      "$SCRIPTS_DIR/save_git_info.sh" "$mode"
-      popd > /dev/null
-
-      if grep -q "$expected_header" "$TEST_DIR/prompt.txt"; then
-          # Check for initial content preservation
-          if grep -q "$initial_content" "$TEST_DIR/prompt.txt"; then
-              # Check for triple backtick escaping (they should be replaced with ` ` `)
-              if grep -F '` ` `' "$TEST_DIR/prompt.txt" > /dev/null; then
-                  echo "✅ PASS: $test_name"
-              else
-                  echo "❌ FAIL: $test_name - Triple backticks not correctly escaped"
-                  cat "$TEST_DIR/prompt.txt"
-                  FAILED=1
-              fi
-          else
-              echo "❌ FAIL: $test_name - Initial content not preserved"
-              FAILED=1
-          fi
-      else
-          echo "❌ FAIL: $test_name - Expected header '$expected_header' not found in prompt.txt"
+      elif ! grep -q "Usage:" "$TEST_DIR/actual_stderr"; then
+          echo "❌ FAIL: $test_name - Usage message not found in stderr"
           FAILED=1
+      else
+          echo "✅ PASS: $test_name"
       fi
+      rm -f "$TEST_DIR/prompt.txt" "$TEST_DIR/actual_stderr"
+      return
+  fi
+
+  pushd "$TEST_DIR" > /dev/null
+  "$SCRIPTS_DIR/save_git_info.sh" "$mode"
+  popd > /dev/null
+
+  if ! grep -q "$expected_header" "$TEST_DIR/prompt.txt"; then
+      echo "❌ FAIL: $test_name - Expected header '$expected_header' not found in prompt.txt"
+      FAILED=1
+  elif ! grep -q "$initial_content" "$TEST_DIR/prompt.txt"; then
+      echo "❌ FAIL: $test_name - Initial content not preserved"
+      FAILED=1
+  elif ! grep -F '` ` `' "$TEST_DIR/prompt.txt" > /dev/null; then
+      echo "❌ FAIL: $test_name - Triple backticks not correctly escaped"
+      cat "$TEST_DIR/prompt.txt"
+      FAILED=1
+  else
+      echo "✅ PASS: $test_name"
   fi
 
   rm -f "$TEST_DIR/prompt.txt" "$TEST_DIR/actual_stderr"
