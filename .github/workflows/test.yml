@@ -16,3 +16,4 @@ jobs:
         run: |
           ./tests/test_action.sh
           ./tests/test_save_git_info.sh
+          ./tests/test_expansion.sh

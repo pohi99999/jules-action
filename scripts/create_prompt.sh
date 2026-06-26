@@ -2,5 +2,7 @@
 set -e
 
 # Create initial prompt
-# Using printf "%s\n" to avoid edge cases with echo -n or backslashes
-printf "%s\n" "$USER_PROMPT" > prompt.txt
+# Using perl to safely expand environment variables in the USER_PROMPT.
+# This prevents prompt injection by passing untrusted data via environment variables.
+# Supports $VAR and ${VAR} syntax, and \$ to escape the dollar sign.
+printf "%s\n" "$USER_PROMPT" | perl -pe 's/(?<!\\)\$\{?(\w+)\}?/$ENV{$1} \/\/ $&/ge; s/\\(\$)/$1/g' > prompt.txt
