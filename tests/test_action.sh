@@ -119,21 +119,31 @@ echo "Testing failure cases for 'Assemble Jules payload'..."
 
   # Set PATH to ONLY our fake_bin directory.
   # This should make 'jq' not found.
-  # We might need to provide some basic tools if assemble_payload.sh uses them before jq check.
-  # Currently it uses: set -e, command, printf, exit.
-  # 'command' is a shell builtin. 'printf' is usually a shell builtin. 'exit' is a shell builtin.
+  # We provide basic tools needed for the test to run.
+  ln -s "$(command -v grep)" fake_bin/grep
+  ln -s "$(command -v cat)" fake_bin/cat
+  ln -s "$(command -v rm)" fake_bin/rm
 
   OLD_PATH="$PATH"
   export PATH="$(pwd)/fake_bin"
 
-  if ./scripts/assemble_payload.sh 2>/dev/null; then
+  if ./scripts/assemble_payload.sh 2>actual_stderr; then
     echo "❌ FAIL: jq missing test - script should have failed"
     export PATH="$OLD_PATH"
     exit 1
   else
-    echo "✅ PASS: jq missing test - script failed as expected"
+    expected_error="Error: jq is not installed. Please install it to continue."
+    if ! grep -q "$expected_error" actual_stderr; then
+      echo "❌ FAIL: jq missing test - incorrect error message"
+      echo "Expected: $expected_error"
+      echo "Got: $(cat actual_stderr)"
+      export PATH="$OLD_PATH"
+      exit 1
+    fi
+    echo "✅ PASS: jq missing test - script failed with correct error message"
     export PATH="$OLD_PATH"
   fi
+  rm -f actual_stderr
 ) || FAILED=1
 rm -rf fake_bin
 
