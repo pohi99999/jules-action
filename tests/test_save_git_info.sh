@@ -17,6 +17,9 @@ trap 'rm -rf "$TEST_DIR"' EXIT
 mkdir -p "$TEST_DIR/bin"
 cat <<'EOF_GIT' > "$TEST_DIR/bin/git"
 #!/bin/bash
+if [ "$MOCK_GIT_FAIL" == "1" ]; then
+  exit 1
+fi
 # Use octal for backtick (\140) to represent triple backticks safely
 backticks="\140\140\140"
 if [ "$1" == "show" ]; then
@@ -86,6 +89,16 @@ run_test() {
 run_test "Last commit mode" "--last-commit" "Existing prompt content" "Content of the latest commit"
 run_test "Commit log mode" "--commit-log" "Existing prompt content" "Log of the last 20 commits"
 run_test "Invalid mode" "--invalid" "Should stay" "No header"
+
+echo "Existing prompt content" > "$TEST_DIR/prompt.txt"
+echo "Testing git failure..."
+if MOCK_GIT_FAIL=1 bash -c "cd '$TEST_DIR' && '$SCRIPTS_DIR/save_git_info.sh' --last-commit" 2>/dev/null; then
+  echo "❌ FAIL: Git failure test - Expected script to exit with error"
+  FAILED=1
+else
+  echo "✅ PASS: Git failure test - Script exited with error as expected"
+fi
+rm -f "$TEST_DIR/prompt.txt"
 
 export PATH="$OLD_PATH"
 

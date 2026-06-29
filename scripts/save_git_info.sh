@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -o pipefail
 
 # scripts/save_git_info.sh
 # Securely appends git information to prompt.txt
