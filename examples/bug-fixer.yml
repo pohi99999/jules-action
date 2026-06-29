@@ -2,7 +2,7 @@ name: Auto-Fix Bugs
 
 on:
   issues:
-    types: [labeled]
+    types: [opened, reopened, labeled]
 
 jobs:
   fix-bug:
@@ -12,7 +12,7 @@ jobs:
     # on repos by adding the 'jules' label,
     # but this example lets you manage the prompt
     # explicitly, add preamble, etc.
-    if: github.event.label.name == 'bug'
+    if: (github.event.action == 'labeled' && github.event.label.name == 'bug') || (github.event.action != 'labeled' && contains(github.event.issue.labels.*.name, 'bug'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
